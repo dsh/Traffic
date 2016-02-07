@@ -28,6 +28,9 @@
     (case light
       :red false
       :green (case direction
+               ; no car
+               nil false
+
                ; Only allow left turns if all other roads have reds.
                ; We could get fancier since we know which direction the opposing traffic is turning.
                ; But in the real world, do you really trust the other guy? Let's drive safe, kids.
@@ -47,7 +50,6 @@
                      (populate-street 10))
              :west (doto (make-street)
                      (populate-street 10))}
-   ; @todo describe why this has to be an atom. Does it?
    :lights (atom {:north :green
                   :south :red
                   :east :red
@@ -64,8 +66,16 @@
   (println "Car from" from "went" direction))
 
 (defn step [intersection]
-  ;; TODO: write
-  )
+  ;; @todo do this in a dosync? I think I'm safe since I deref lights at last second, but I'm not positive.
+  (let [lights (get intersection :lights)]
+    (doseq [keyval (get intersection :streets)]
+      (let [from (key keyval)
+            street (val keyval)
+            direction (first @street)]
+        (when (allowed? @lights from direction)
+          (do
+            (move-car from direction)
+            (send street pop)))))))
 
 (defn -main [steps]
   (let [steps (Integer. steps)

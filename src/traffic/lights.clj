@@ -1,5 +1,9 @@
 (ns traffic.lights)
 
+; Original code had no facilities for changing lights. I added a new agent to cover that.
+; Alternative solution should be to keep some state in steps to determine how many steps
+; have executed and thus time to switch lights.
+
 (def ^{:doc "Time to sleep between steps in milliseconds."} interval 100)
 
 (defn make-street

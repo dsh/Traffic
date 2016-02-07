@@ -18,10 +18,25 @@
                  :east {:straight :west :right :north :left :south}
                  :west {:straight :east :right :south :left :north}})
 
+
 (defn allowed?
+  ; If we pass in intersection would could also allow left turns
+  ; if the other roads are all empty.
   [lights from direction]
-  ;; TODO: write
-  )
+  (let [light (get lights from)
+        ]
+    (case light
+      :red false
+      :green (case direction
+               ; Only allow left turns if all other roads have reds.
+               ; We could get fancier since we know which direction the opposing traffic is turning.
+               ; But in the real world, do you really trust the other guy? Let's drive safe, kids.
+               :left (every? (partial = :red) (vals (dissoc lights :north)))
+
+               ; always allow straight and right turns
+               true
+               )
+      )))
 
 (defn four-way-intersection []
   {:streets {:north (doto (make-street)
@@ -32,6 +47,7 @@
                      (populate-street 10))
              :west (doto (make-street)
                      (populate-street 10))}
+   ; @todo describe why this has to be an atom. Does it?
    :lights (atom {:north :green
                   :south :red
                   :east :red
